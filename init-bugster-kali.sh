@@ -26,18 +26,34 @@ cat ~/.ssh/id_ed25519.pub
 read -p "Set key on your github.com and continue with Enter..."
 
 ## setup notes and automatic pull
-git clone git@github.com:8ugst3r/notes.git ~/git
+mkdir -p ~/git
+git clone git@github.com:8ugst3r/notes.git ~/git/notes
 
+### prepare file for logs
 sudo touch /var/log/note-update.log
 sudo chown root:adm /var/log/note-update.log
-sudo chmod 664 /var/log/note-update.log
+sudo chmod 666 /var/log/note-update.log
 
+### prepare scripts for git pull
 sudo tee /usr/local/bin/notes-update.sh > /dev/null <<'EOF'
 #!/bin/bash
-/usr/bin/git pull -C ~/git/notes >> /var/log/note-update.log 2>&1
+LOGFILE=/var/log/note-update.log
+REPO=/home/bugster/git/notes
+
+sleep 30
+
+grep -q "^github.com " ~/.ssh/known_hosts || ssh-keyscan github.com >> ~/.ssh/known_hosts
+eval $(ssh-agent -s)
+ssh-add /home/bugster/.ssh/id_rsa
+
+echo "=== git pull attempted at $(date '+%Y-%m-%d %H:%M:%S') ===" >> "$LOGFILE"
+/usr/bin/git -C "$REPO" pull >> "$LOGFILE" 2>&1
+
 EOF
+
 sudo chmod 755 /usr/local/bin/notes-update.sh
 
+### set cron to run update script
 sudo tee /etc/cron.d/notes-update <<EOF
 # Pull latest notes on every boot
 @reboot $(whoami) /usr/local/bin/notes-update.sh
@@ -55,4 +71,8 @@ sudo apt install wget gdebi-core
 wget "https://discordapp.com/api/download?platform=linux&format=deb" -O discord.deb
 sudo gdebi discord.deb
 
-sudo apt install zim
+## vs code
+sudo apt update && sudo apt install -y wget gpg && wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/packages.microsoft.gpg > /dev/null && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list && sudo apt update && sudo apt install -y code
+
+## others
+sudo apt install vim zim tmux
