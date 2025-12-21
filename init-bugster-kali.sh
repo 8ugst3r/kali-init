@@ -61,6 +61,25 @@ EOF
 
 # APPS
 
+## others
+sudo apt install vim zim tmux curl
+
+## kitty
+sudo apt install kitty
+sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/kitty 50
+sudo update-alternatives --config x-terminal-emulator
+
+mkdir -p /home/bugster/Pictures
+mkdir -p ~/.config/kitty
+curl -L https://i.ibb.co/RpzfymVS/image.png -o /home/bugster/Pictures/terminal-background.png
+cat >> /home/bugster/.config/kitty/kitty.conf <<'EOF'
+background_image /home/bugster/Pictures/terminal-background.png
+background_image_opacity 0.25
+background_opacity 0.9
+background_image_scale fill
+EOF
+
+
 ## chrome
 sudo apt update && sudo apt upgrade -y && sudo apt install wget ca-certificates curl -y
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -74,5 +93,4 @@ sudo gdebi discord.deb
 ## vs code
 sudo apt update && sudo apt install -y wget gpg && wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/packages.microsoft.gpg > /dev/null && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list && sudo apt update && sudo apt install -y code
 
-## others
-sudo apt install vim zim tmux
+
